@@ -1,0 +1,176 @@
+.mp-root {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-base);
+}
+
+/* 左侧 */
+.mp-side {
+  width: 156px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: 14px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(10,16,32,0.7);
+}
+.mp-side-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mp-side-hd span { font-size: 13px; font-weight: 600; color: var(--text1); }
+.mp-reset {
+  font-size: 10px; color: var(--green); background: none; border: none;
+  cursor: pointer; font-family: var(--font-cn); padding: 0;
+  white-space: nowrap;
+}
+.mp-reset:hover { text-decoration: underline; }
+
+.mp-filter-group { display: flex; flex-direction: column; gap: 7px; }
+.mp-filter-title { font-size: 11px; color: var(--text3); font-weight: 500; }
+
+.mp-radio {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; color: var(--text2); cursor: pointer;
+}
+.mp-radio input { accent-color: var(--green); }
+
+.mp-el-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.mp-el-btn {
+  font-family: var(--font-cn); font-size: 10px; font-weight: 600;
+  padding: 4px 0; border-radius: 4px; cursor: pointer;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text2);
+  transition: all 0.15s;
+}
+.mp-el-btn:hover { background: rgba(255,255,255,0.08); }
+.mp-el-btn.active { background: rgba(255,255,255,0.07); }
+
+.mp-price-input {
+  width: 62px !important;
+  padding: 5px 8px !important;
+  font-size: 12px !important;
+}
+
+/* 主区 */
+.mp-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.mp-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: rgba(10,16,32,0.5);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mp-tabs { display: flex; gap: 4px; }
+.mp-tab {
+  padding: 5px 16px; border-radius: 20px;
+  background: none; border: 1px solid transparent;
+  font-family: var(--font-cn); font-size: 12px; color: var(--text2);
+  cursor: pointer; transition: all 0.15s;
+}
+.mp-tab:hover  { background: rgba(255,255,255,0.05); color: var(--text1); }
+.mp-tab.active {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+  color: var(--text0);
+}
+
+.mp-sort { display: flex; gap: 8px; }
+.mp-select {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid var(--border2) !important;
+  border-radius: 6px !important;
+  padding: 5px 10px !important;
+  font-size: 12px !important;
+  color: var(--text1) !important;
+  width: auto !important;
+  cursor: pointer;
+}
+
+/* 卡片网格 */
+.mp-grid {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 14px;
+  align-content: start;
+}
+
+/* 单卡 */
+.mp-card {
+  background: #111d35;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px 10px 12px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.mp-card:hover {
+  border-color: rgba(255,255,255,0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.mp-card-badge {
+  position: absolute; top: 7px; left: 8px;
+  background: var(--green2); color: #0f1f0a;
+  font-size: 9px; font-weight: 800;
+  padding: 1px 7px; border-radius: 12px;
+  letter-spacing: 0.04em; font-family: 'Rajdhani', monospace;
+}
+.mp-card-coord {
+  position: absolute; top: 7px; right: 8px;
+  font-size: 9px; color: var(--text3); font-family: monospace;
+}
+
+.mp-card-cube { position: relative; margin: 10px 0 2px; }
+.mp-cube-glow {
+  position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+  width: 80px; height: 20px;
+  border-radius: 50%;
+}
+
+.mp-card-res {
+  display: flex; flex-wrap: wrap; gap: 3px; justify-content: center;
+  min-height: 18px;
+}
+.mp-res-tag {
+  font-size: 9px; font-weight: 700;
+  padding: 1px 5px; border-radius: 3px;
+  border: 1px solid;
+  font-family: 'Rajdhani', monospace;
+  letter-spacing: 0.04em;
+}
+
+.mp-card-price {
+  display: flex; align-items: baseline; gap: 3px;
+}
+.mp-price-num { font-size: 17px; font-weight: 800; color: var(--gold); font-family: 'Rajdhani', monospace; }
+.mp-price-unit { font-size: 10px; color: var(--text3); }
+
+.mp-bid-btn { width: 100%; margin-top: 2px !important; }
