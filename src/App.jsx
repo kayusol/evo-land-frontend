@@ -4,15 +4,17 @@ import WorldMap from './pages/WorldMap.jsx'
 import MarketPage from './pages/MarketPage.jsx'
 import FarmPage from './pages/FarmPage.jsx'
 import AssetsPage from './pages/AssetsPage.jsx'
+import SwapPage from './pages/SwapPage.jsx'
 import Toast from './components/Toast.jsx'
 import { ToastProvider } from './contexts/ToastContext.jsx'
 import './App.css'
 
 const PAGES = [
   { id: 'map',    zh: '地图',  en: 'Map',    icon: '🌍' },
-  { id: 'market', zh: '市場',  en: 'Market', icon: '🏛' },
-  { id: 'farm',   zh: '農場',  en: 'Farm',   icon: '🌾' },
-  { id: 'assets', zh: '資產',  en: 'Assets', icon: '💎' },
+  { id: 'market', zh: '市场',  en: 'Market', icon: '🏛' },
+  { id: 'farm',   zh: '农场',  en: 'Farm',   icon: '🌾' },
+  { id: 'swap',   zh: '兑换',  en: 'Swap',   icon: '🔄' },
+  { id: 'assets', zh: '资产',  en: 'Assets', icon: '💎' },
 ]
 
 function AppInner() {
@@ -21,6 +23,7 @@ function AppInner() {
     map:    <WorldMap />,
     market: <MarketPage />,
     farm:   <FarmPage />,
+    swap:   <SwapPage />,
     assets: <AssetsPage />,
   }
   return (
