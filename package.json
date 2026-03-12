@@ -1,23 +1,26 @@
 {
   "name": "evo-land-frontend",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev":     "vite",
+    "build":   "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@rainbow-me/rainbowkit": "^2.1.3",
-    "@tanstack/react-query": "^5.51.1",
-    "viem": "^2.17.0",
-    "wagmi": "^2.12.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@rainbow-me/rainbowkit":  "^2.1.3",
+    "@tanstack/react-query":   "^5.51.21",
+    "buffer":                  "^6.0.3",
+    "react":                   "^18.3.1",
+    "react-dom":               "^18.3.1",
+    "viem":                    "^2.17.0",
+    "wagmi":                   "^2.12.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.3.1"
+    "@types/react":            "^18.3.3",
+    "@types/react-dom":        "^18.3.0",
+    "@vitejs/plugin-react":    "^4.3.1",
+    "vite":                    "^5.3.1"
   }
 }

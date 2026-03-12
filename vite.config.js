@@ -3,10 +3,16 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  define: { global: 'globalThis' },
+  define: {
+    global: 'globalThis',
+  },
   resolve: {
     alias: {
-      // needed for some wagmi/viem deps
-    }
-  }
+      // RainbowKit 依赖 buffer
+      'buffer': 'buffer',
+    },
+  },
+  optimizeDeps: {
+    include: ['buffer'],
+  },
 })

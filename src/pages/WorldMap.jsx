@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import LandPanel from '../components/LandPanel.jsx'
-import { LAND_COLORS, RES_COLORS, RES_NAMES_ZH } from '../constants/contracts.js'
+import { LAND_COLORS, RES_COLORS } from '../constants/contracts.js'
 import './WorldMap.css'
 
 const GRID = 100
@@ -23,7 +23,6 @@ function buildRegionMap() {
   const map = new Uint8Array(GRID * GRID)
   for (let y = 0; y < GRID; y++) {
     for (let x = 0; x < GRID; x++) {
-      // 加扰动让边界自然
       const nx = x + Math.sin(y * 0.23) * 4
       const ny = y + Math.cos(x * 0.19) * 4
       let minD = Infinity, t = 0
@@ -40,39 +39,42 @@ function buildRegionMap() {
 function seedRates(x, y, mainType) {
   return Array.from({ length: 5 }, (_, i) => {
     const v = Math.abs(Math.sin((x * (i * 1.7 + 2) + y * (i * 1.3 + 1.5)) * 0.41 + i) * 255)
-    return i === mainType
-      ? Math.floor(v % 160 + 60)   // 主资源 60-220
-      : Math.floor(v % 55 + 2)     // 次资源 2-57
+    return i === mainType ? Math.floor(v % 160 + 60) : Math.floor(v % 55 + 2)
   })
 }
 
-// 模拟玩家头像（像截图里的像素人物）
+// 模拟玩家（展示用）
 const MOCK_PLAYERS = [
-  { x: 8,  y: 8,  color: '#e74c3c', emoji: '👤' },
-  { x: 25, y: 32, color: '#3498db', emoji: '👤' },
-  { x: 55, y: 50, color: '#2ecc71', emoji: '⚗️' },
-  { x: 72, y: 20, color: '#9b59b6', emoji: '👤' },
-  { x: 18, y: 68, color: '#f39c12', emoji: '👤' },
-  { x: 88, y: 75, color: '#1abc9c', emoji: '👤' },
+  { x: 8,  y: 8,  color: '#c0392b' },
+  { x: 25, y: 32, color: '#2980b9' },
+  { x: 55, y: 50, color: '#27ae60' },
+  { x: 72, y: 20, color: '#8e44ad' },
+  { x: 18, y: 68, color: '#d68910' },
+  { x: 88, y: 75, color: '#148f77' },
 ]
 
 export default function WorldMap() {
   const { isConnected } = useAccount()
-  const cvs = useRef(null)
-  const [zoom, setZoom]     = useState(1)
-  const [pan, setPan]       = useState({ x: 0, y: 0 })
-  const [drag, setDrag]     = useState(null)
-  const [moved, setMoved]   = useState(false)
+  const cvs  = useRef(null)
+  const mini = useRef(null)   // 小地图 Canvas
+  const [zoom, setZoom]       = useState(1)
+  const [pan, setPan]         = useState({ x: 0, y: 0 })
+  const [drag, setDrag]       = useState(null)
+  const [moved, setMoved]     = useState(false)
   const [selected, setSelected] = useState(null)
   const [panelOpen, setPanelOpen] = useState(false)
-  const [hovered, setHovered]    = useState(null)
+  const [hovered, setHovered]   = useState(null)
+  // 搜索坐标
+  const [searchX, setSearchX] = useState('')
+  const [searchY, setSearchY] = useState('')
 
   const regionMap = useMemo(() => buildRegionMap(), [])
-  const getLand = useCallback((x, y) => {
-    const mainType = regionMap[y * GRID + x]
-    return { mainType, rates: seedRates(x, y, mainType) }
+  const getLand   = useCallback((x, y) => {
+    const t = regionMap[y * GRID + x]
+    return { mainType: t, rates: seedRates(x, y, t) }
   }, [regionMap])
 
+  // ===== 主 Canvas 绘制 =====
   const draw = useCallback(() => {
     const c = cvs.current; if (!c) return
     const ctx = c.getContext('2d')
@@ -84,21 +86,19 @@ export default function WorldMap() {
     const ox = pan.x + W / 2 - GRID * cell / 2
     const oy = pan.y + H / 2 - GRID * cell / 2
 
-    // ===== 地块 =====
+    // 地块色块
     for (let y = 0; y < GRID; y++) {
       for (let x = 0; x < GRID; x++) {
         const cx = ox + x * cell, cy = oy + y * cell
         if (cx + cell < 0 || cy + cell < 0 || cx > W || cy > H) continue
-        const t = regionMap[y * GRID + x]
-        ctx.fillStyle = LAND_COLORS[t]
+        ctx.fillStyle = LAND_COLORS[regionMap[y * GRID + x]]
         ctx.fillRect(cx, cy, cell - 0.4, cell - 0.4)
       }
     }
 
-    // ===== 网格线 =====
+    // 网格线
     if (zoom > 2.8) {
-      ctx.strokeStyle = 'rgba(0,0,0,0.22)'
-      ctx.lineWidth = 0.4
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.4
       for (let x = 0; x <= GRID; x++) {
         const px = ox + x * cell
         ctx.beginPath(); ctx.moveTo(px, oy); ctx.lineTo(px, oy + GRID * cell); ctx.stroke()
@@ -109,66 +109,72 @@ export default function WorldMap() {
       }
     }
 
-    // ===== 玩家头像 =====
-    const asz = Math.max(12, Math.min(28, cell * 1.8))
-    if (zoom > 0.5) {
+    // 坐标标注（确定性噪声，高缩放才显）
+    if (zoom > 5) {
+      ctx.font = `${Math.min(cell * 0.22, 9)}px monospace`
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+      ctx.fillStyle = 'rgba(255,255,255,0.45)'
+      for (let y = 0; y < GRID; y++) {
+        for (let x = 0; x < GRID; x++) {
+          const cx = ox + x * cell, cy = oy + y * cell
+          if (cx < -cell || cy < -cell || cx > W || cy > H) continue
+          ctx.fillText(`${x},${y}`, cx + cell / 2, cy + cell / 2)
+        }
+      }
+    }
+
+    // 玩家头像
+    const asz = Math.max(10, Math.min(26, cell * 1.7))
+    if (zoom > 0.45) {
       for (const p of MOCK_PLAYERS) {
         const px = ox + p.x * cell + cell / 2
         const py = oy + p.y * cell + cell / 2
         if (px < -asz || py < -asz || px > W + asz || py > H + asz) continue
-        const h = asz, w = asz * 0.82
-        // 像素方块头像
-        ctx.fillStyle = 'rgba(0,0,0,0.55)'
-        ctx.fillRect(px - w / 2 - 1, py - h / 2 - 1, w + 2, h + 2)
+        const w = asz * 0.85, h = asz
+        ctx.fillStyle = 'rgba(0,0,0,0.6)'
+        ctx.fillRect(px - w/2 - 1, py - h/2 - 1, w + 2, h + 2)
         ctx.fillStyle = p.color
-        ctx.fillRect(px - w / 2, py - h / 2, w, h)
-        // 简单像素脸
-        ctx.fillStyle = 'rgba(255,255,255,0.85)'
-        const ew = Math.max(1, w * 0.2)
-        ctx.fillRect(px - w * 0.22, py - h * 0.1, ew, ew)  // 左眼
-        ctx.fillRect(px + w * 0.12, py - h * 0.1, ew, ew)  // 右眼
+        ctx.fillRect(px - w/2, py - h/2, w, h)
+        // 简单像素眼睛
+        ctx.fillStyle = 'rgba(255,255,255,0.9)'
+        const ew = Math.max(1, w * 0.18)
+        ctx.fillRect(px - w * 0.2, py - h * 0.08, ew, ew)
+        ctx.fillRect(px + w * 0.1, py - h * 0.08, ew, ew)
       }
     }
 
-    // ===== 悬停高亮 =====
+    // 悬停高亮
     if (hovered && zoom > 1.2) {
       const cx = ox + hovered.x * cell, cy = oy + hovered.y * cell
-      ctx.fillStyle = 'rgba(255,255,255,0.13)'
+      ctx.fillStyle = 'rgba(255,255,255,0.14)'
       ctx.fillRect(cx, cy, cell - 0.4, cell - 0.4)
     }
 
-    // ===== 选中框 =====
+    // 选中框
     if (selected) {
       const cx = ox + selected.x * cell, cy = oy + selected.y * cell
       const lw = Math.max(1.5, cell * 0.12)
-      ctx.strokeStyle = '#ffffff'
-      ctx.lineWidth = lw
-      ctx.strokeRect(cx + lw / 2, cy + lw / 2, cell - lw - 0.4, cell - lw - 0.4)
-      // 四角标记
-      const cs = Math.max(2.5, cell * 0.2)
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = lw
+      ctx.strokeRect(cx + lw/2, cy + lw/2, cell - lw - 0.4, cell - lw - 0.4)
       ctx.fillStyle = '#ffffff'
-      ;[[cx, cy], [cx + cell - lw, cy], [cx, cy + cell - lw], [cx + cell - lw, cy + cell - lw]]
-        .forEach(([bx, by]) => ctx.fillRect(bx - 1, by - 1, 3, 3))
+      const cpts = [[cx,cy],[cx+cell-lw,cy],[cx,cy+cell-lw],[cx+cell-lw,cy+cell-lw]]
+      cpts.forEach(([bx,by]) => ctx.fillRect(bx-1,by-1,3,3))
     }
 
-    // ===== 边框 =====
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)'
-    ctx.lineWidth = 1.5
+    // 内边框
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1.5
     ctx.strokeRect(ox, oy, GRID * cell, GRID * cell)
 
-    // ===== 坐标轴 =====
+    // 坐标轴
     if (zoom > 0.9) {
       const step = zoom > 4 ? 5 : zoom > 2 ? 10 : zoom > 1.2 ? 20 : 50
-      ctx.fillStyle = 'rgba(255,255,255,0.22)'
-      ctx.font = '9px monospace'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'bottom'
+      ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.font = '9px monospace'
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'
       for (let x = 0; x <= GRID; x += step) {
         const px = ox + x * cell
         if (px > 14 && px < W - 14) ctx.fillText(x, px, oy - 2)
       }
-      ctx.textAlign = 'right'
-      ctx.textBaseline = 'middle'
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'
       for (let y = 0; y <= GRID; y += step) {
         const py = oy + y * cell
         if (py > 14 && py < H - 14) ctx.fillText(y, ox - 4, py)
@@ -176,7 +182,44 @@ export default function WorldMap() {
     }
   }, [zoom, pan, selected, hovered, regionMap])
 
+  // ===== 小地图绘制 =====
+  const drawMini = useCallback(() => {
+    const m = mini.current; if (!m) return
+    const ctx = m.getContext('2d')
+    const W = m.width, H = m.height
+    const cs = W / GRID  // 每格小地图像素大小
+
+    // 地块小地图
+    for (let y = 0; y < GRID; y++) {
+      for (let x = 0; x < GRID; x++) {
+        ctx.fillStyle = LAND_COLORS[regionMap[y * GRID + x]]
+        ctx.fillRect(x * cs, y * cs, cs, cs)
+      }
+    }
+
+    // 当前视口框
+    const c = cvs.current; if (!c) return
+    const cell = BASE_CELL * zoom
+    const ox = pan.x + c.width / 2 - GRID * cell / 2
+    const oy = pan.y + c.height / 2 - GRID * cell / 2
+    const vx = Math.max(0, -ox / cell)
+    const vy = Math.max(0, -oy / cell)
+    const vw = Math.min(GRID, c.width / cell)
+    const vh = Math.min(GRID, c.height / cell)
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'
+    ctx.lineWidth = 1
+    ctx.strokeRect(vx * cs, vy * cs, vw * cs, vh * cs)
+
+    // 选中地块点
+    if (selected) {
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(selected.x * cs - 1, selected.y * cs - 1, cs + 2, cs + 2)
+    }
+  }, [zoom, pan, selected, regionMap])
+
   useEffect(() => { draw() }, [draw])
+  useEffect(() => { drawMini() }, [drawMini])
 
   useEffect(() => {
     const resize = () => {
@@ -205,7 +248,8 @@ export default function WorldMap() {
   const onDown  = e => { setDrag({ ox: e.clientX - pan.x, oy: e.clientY - pan.y }); setMoved(false) }
   const onMove  = e => {
     if (drag) {
-      if (Math.abs(e.clientX - drag.ox - pan.x) > 3 || Math.abs(e.clientY - drag.oy - pan.y) > 3) setMoved(true)
+      if (Math.abs(e.clientX - drag.ox - pan.x) > 3 || Math.abs(e.clientY - drag.oy - pan.y) > 3)
+        setMoved(true)
       setPan({ x: e.clientX - drag.ox, y: e.clientY - drag.oy })
     }
     if (zoom > 1.2) setHovered(toCell(e.clientX, e.clientY))
@@ -215,8 +259,7 @@ export default function WorldMap() {
     if (drag && !moved) {
       const cell = toCell(e.clientX, e.clientY)
       if (cell) {
-        const tid = cell.x * GRID + cell.y + 1
-        setSelected({ ...cell, tokenId: tid, attr: getLand(cell.x, cell.y) })
+        setSelected({ ...cell, tokenId: cell.x * GRID + cell.y + 1, attr: getLand(cell.x, cell.y) })
         setPanelOpen(true)
       }
     }
@@ -228,10 +271,39 @@ export default function WorldMap() {
     const r = c.getBoundingClientRect()
     const mx = e.clientX - r.left, my = e.clientY - r.top
     const f = e.deltaY < 0 ? 1.18 : 0.847
-    const nz = Math.max(0.25, Math.min(18, zoom * f))
+    const nz = Math.max(0.22, Math.min(18, zoom * f))
     const sc = nz / zoom
     setPan(p => ({ x: mx - (mx - p.x) * sc, y: my - (my - p.y) * sc }))
     setZoom(nz)
+  }
+
+  // 搜索跳转到指定坐标
+  const jumpTo = () => {
+    const gx = parseInt(searchX), gy = parseInt(searchY)
+    if (isNaN(gx) || isNaN(gy) || gx < 0 || gx >= GRID || gy < 0 || gy >= GRID) return
+    const c = cvs.current; if (!c) return
+    const targetZoom = Math.max(zoom, 4)
+    const cell = BASE_CELL * targetZoom
+    setZoom(targetZoom)
+    setPan({
+      x: c.width  / 2 - gx * cell - cell / 2,
+      y: c.height / 2 - gy * cell - cell / 2,
+    })
+    const attr = getLand(gx, gy)
+    setSelected({ x: gx, y: gy, tokenId: gx * GRID + gy + 1, attr })
+    setPanelOpen(true)
+  }
+
+  // 点击小地图快速跳转
+  const onMiniClick = e => {
+    const m = mini.current; if (!m) return
+    const r = m.getBoundingClientRect()
+    const gx = Math.floor((e.clientX - r.left) / (m.width / GRID))
+    const gy = Math.floor((e.clientY - r.top)  / (m.height / GRID))
+    if (gx < 0 || gx >= GRID || gy < 0 || gy >= GRID) return
+    const c = cvs.current; if (!c) return
+    const cell = BASE_CELL * zoom
+    setPan({ x: c.width / 2 - gx * cell - cell / 2, y: c.height / 2 - gy * cell - cell / 2 })
   }
 
   const LEGEND = [
@@ -258,21 +330,39 @@ export default function WorldMap() {
           </div>
         </div>
         <div className="wm-tb-right">
+          {/* 坐标搜索 */}
+          <div className="wm-search">
+            <input
+              className="wm-search-input"
+              type="number" placeholder="X"
+              value={searchX} onChange={e => setSearchX(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && jumpTo()}
+              min="0" max="99"
+            />
+            <span style={{ color: '#334155', fontSize: 12 }}>,</span>
+            <input
+              className="wm-search-input"
+              type="number" placeholder="Y"
+              value={searchY} onChange={e => setSearchY(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && jumpTo()}
+              min="0" max="99"
+            />
+            <button className="btn btn-sm wm-jump-btn" onClick={jumpTo}>跳转 Go</button>
+          </div>
           <span className="wm-zoom-txt">{(zoom * 100).toFixed(0)}%</span>
           <button className="btn btn-sm btn-ghost"
             onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }) }}
-          >重置 Reset</button>
+          >重置</button>
         </div>
       </div>
 
       {/* 地图主体 */}
       <div className="wm-body">
-        {/* Canvas */}
         <div className="wm-canvas-wrap">
           <canvas
             ref={cvs}
             className="wm-canvas"
-            style={{ cursor: drag ? 'grabbing' : 'default' }}
+            style={{ cursor: drag ? 'grabbing' : 'crosshair' }}
             onMouseDown={onDown}
             onMouseMove={onMove}
             onMouseUp={onUp}
@@ -280,17 +370,10 @@ export default function WorldMap() {
             onWheel={onWheel}
           />
 
-          {/* 预览提示 */}
+          {/* 预览标签 */}
           <div className="wm-preview-badge">
             <span className="wm-badge-dot" />
             预览模式 Preview · 部署合约后显示真实数据
-          </div>
-
-          {/* 缩放控件 */}
-          <div className="wm-zoom-ctrl">
-            <button className="wm-zoom-btn" onClick={() => setZoom(z => Math.min(18, z * 1.3))}>＋</button>
-            <div className="wm-zoom-sep" />
-            <button className="wm-zoom-btn" onClick={() => setZoom(z => Math.max(0.25, z * 0.77))}>－</button>
           </div>
 
           {/* 坐标提示 */}
@@ -299,6 +382,26 @@ export default function WorldMap() {
               ({hovered.x}, {hovered.y}) · ID #{hovered.x * 100 + hovered.y + 1}
             </div>
           )}
+
+          {/* 小地图 */}
+          <div className="wm-minimap">
+            <div className="wm-mini-title">小地图 Minimap</div>
+            <canvas
+              ref={mini}
+              className="wm-mini-canvas"
+              width={130}
+              height={130}
+              onClick={onMiniClick}
+              title="点击小地图快速跳转"
+            />
+          </div>
+
+          {/* 缩放控件 */}
+          <div className="wm-zoom-ctrl">
+            <button className="wm-zoom-btn" onClick={() => setZoom(z => Math.min(18, z * 1.3))}>＋</button>
+            <div className="wm-zoom-sep" />
+            <button className="wm-zoom-btn" onClick={() => setZoom(z => Math.max(0.22, z * 0.77))}>－</button>
+          </div>
         </div>
 
         {/* 右侧地块详情面板 */}

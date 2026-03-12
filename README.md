@@ -1,53 +1,76 @@
-# Evolution Land BSC — Frontend
+# 进化星球 BSC 单链版
 
-React + Vite + RainbowKit + viem/wagmi frontend for Evolution Land BSC.
+**Evolution Land BSC Single-Chain Edition** — 中英双语区块链游戏前端
 
-## Stack
-- **React 18** + **Vite 5**
-- **RainbowKit** — wallet connection UI  
-- **wagmi v2 + viem** — chain interactions
-- **Zero UI frameworks** — fully custom pixel sci-fi design
-- **Fonts**: Orbitron (display) + Share Tech Mono (mono) + Exo 2 (body)
+## 技术栈
 
-## Pages
-| Page | Description |
+| 层 | 技术 |
 |---|---|
-| World Map | Interactive 100×100 canvas map, zoom/pan, land inspector |
-| My Lands | View owned lands, create Dutch auctions |
-| Mining | Assign apostles + drills to lands, claim resources |
-| Auction | Browse & bid on live Dutch auctions, pay with RING |
-| Inventory | Token balances + apostle & drill NFT collection |
+| 框架 | React 18 + Vite 5 |
+| 钱包连接 | RainbowKit v2 + wagmi v2 + viem |
+| 目标链 | BSC 测试网 (ChainID 97) |
+| 风格 | 仿进化星球原版暗色风格 |
 
-## Quick Start
+## 快速开始
 
 ```bash
+# 1. 克隆仓库
+git clone https://github.com/kayusol/evo-land-frontend
+cd evo-land-frontend
+
+# 2. 安装依赖
 npm install
+
+# 3. 开发模式
 npm run dev
+# 默认访问 http://localhost:5173
 ```
 
-## Setup After Deployment
+## 部署合约后配置
 
-1. Run the contract deploy (see `evo-land-bsc` repo)
-2. Copy contract addresses from `deployed.json`
-3. Fill in `src/constants/contracts.js`
+1. 运行合约仓库的 GitHub Actions等待合约地址
+2. 将地址填入 `src/constants/contracts.js`：
 
 ```js
 export const CONTRACTS = {
-  ring:    '0x...', // RING token
-  land:    '0x...', // LandNFT
-  drill:   '0x...', // DrillNFT
-  apostle: '0x...', // ApostleNFT
-  mining:  '0x...', // MiningSystem
-  auction: '0x...', // LandAuction
-  // + 5 resource tokens
+  ring:    '0x....',  // RING 代币
+  gold:    '0x....',  // 黄金资源
+  wood:    '0x....',  // 木材资源
+  water:   '0x....',  // 水源资源
+  fire:    '0x....',  // 火焰资源
+  soil:    '0x....',  // 土地资源
+  land:    '0x....',  // 土地 NFT
+  drill:   '0x....',  // 钻头 NFT
+  apostle: '0x....',  // 使徒 NFT
+  mining:  '0x....',  // 挖矿合约
+  auction: '0x....',  // 拍卖合约
 }
 ```
 
-## Deploy (Vercel / Netlify)
-```bash
-npm run build
-# upload dist/ folder
-```
+## 功能页面
 
-## WalletConnect
-Replace `evo-land-bsc-demo` in `src/config/wagmi.js` with a real [WalletConnect projectId](https://cloud.walletconnect.com).
+| 页面 | 功能 |
+|---|---|
+| 🌍 地图 | 交互式 100×100 世界地图，点击地块查看详情 |
+| 🏔 我的地块 | 查看持有地块，上架荷兰拍卖 |
+| ⛏ 挖矿 | 派遣使徒+钻头挖矿，领取资源 |
+| 🏛 拍卖 | 浏览所有拍卖中的地块，实时价格 |
+| 💎 资产 | 查看 RING / 资源代币 / 使徒 / 钻头 |
+
+## WalletConnect 配置（可选）
+
+第三方钱包（MetaMask 第一次连接无需）需要 projectId：
+
+1. 访问 [cloud.walletconnect.com](https://cloud.walletconnect.com) 获取免费 projectId
+2. 替换 `src/config/wagmi.js` 中的 `evo-land-bsc-demo`
+
+## 地块系统
+
+- 地块总数：10,000 块 (100×100)
+- Token ID = x × 100 + y + 1
+- 资源属性： uint80 打包，每 16bit 一种资源
+- 採矿公式： output = landRate × apostleStrength/50 × drillBoost × 1e18 × elapsed / 86400
+
+## 合约仓库
+
+https://github.com/kayusol/evo-land-bsc
