@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import TopNav from './components/TopNav.jsx'
 import WorldMap from './pages/WorldMap.jsx'
 import MarketPage from './pages/MarketPage.jsx'
@@ -23,12 +22,11 @@ const PAGES = [
 function AppInner() {
   const [page, setPage] = useState('map')
 
-  // 处理 ?ref=0x... 邀请参数——自动跳转到邀请页并填充输入框
+  // 处理 ?ref=0x... 邀请参数，不需要 react-router-dom
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const ref = params.get('ref')
     if (ref) {
-      // 存入 sessionStorage 供 ReferralPage 读取
       sessionStorage.setItem('pendingRef', ref)
       setPage('referral')
     }
