@@ -11,15 +11,15 @@ import './App.css'
 
 const PAGES = [
   { id: 'map',       zh: '地图',   en: 'Map',       icon: '🌍' },
-  { id: 'mylands',   zh: '我的地块', en: 'My Lands',   icon: '🏔' },
-  { id: 'mining',    zh: '挖矿',   en: 'Mining',     icon: '⛏' },
-  { id: 'auction',   zh: '拍卖',   en: 'Auction',    icon: '🏛' },
-  { id: 'inventory', zh: '资产',   en: 'Inventory',  icon: '💎' },
+  { id: 'mylands',   zh: '我的地块', en: 'My Lands',  icon: '🏔' },
+  { id: 'mining',    zh: '挖矿',   en: 'Mining',    icon: '⛏' },
+  { id: 'auction',   zh: '拍卖',   en: 'Auction',   icon: '🏛' },
+  { id: 'inventory', zh: '资产',   en: 'Assets',    icon: '💎' },
 ]
 
 function AppInner() {
   const [page, setPage] = useState('map')
-  const pages = {
+  const views = {
     map:       <WorldMap />,
     mylands:   <MyLands />,
     mining:    <Mining />,
@@ -30,7 +30,9 @@ function AppInner() {
     <div className="app-root">
       <TopNav pages={PAGES} current={page} onChange={setPage} />
       <main className="app-main">
-        <div className="fade-in" key={page}>{pages[page]}</div>
+        <div className="fade-up" key={page} style={{ height: '100%' }}>
+          {views[page]}
+        </div>
       </main>
       <Toast />
     </div>
