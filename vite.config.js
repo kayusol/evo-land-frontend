@@ -5,6 +5,8 @@ export default defineConfig({
   plugins: [react()],
   define: { global: 'globalThis' },
   resolve: {
-    alias: { buffer: 'buffer/' }
+    alias: {
+      // needed for some wagmi/viem deps
+    }
   }
 })

@@ -1,4 +1,6 @@
-// ── Fill these after deploying contracts ──────────────────────
+// ================================================================
+// Fill these after running the deploy script
+// ================================================================
 export const CONTRACTS = {
   ring:    '0x0000000000000000000000000000000000000000',
   gold:    '0x0000000000000000000000000000000000000000',
@@ -13,17 +15,13 @@ export const CONTRACTS = {
   auction: '0x0000000000000000000000000000000000000000',
 }
 
-export const RESOURCE_NAMES  = ['Gold', 'Wood', 'Water', 'Fire', 'Soil']
-export const RESOURCE_ICONS  = ['🪙', '🌲', '💧', '🔥', '⛰']
-export const RESOURCE_KEYS   = ['gold', 'wood', 'water', 'fire', 'soil']
-export const RESOURCE_COLORS = ['#ffd700', '#00e676', '#00e5ff', '#ff6d00', '#bcaaa4']
-export const RESOURCE_GLOWS  = [
-  'rgba(255,215,0,0.4)',
-  'rgba(0,230,118,0.4)',
-  'rgba(0,229,255,0.4)',
-  'rgba(255,109,0,0.4)',
-  'rgba(188,170,164,0.3)',
-]
+export const ZERO = '0x0000000000000000000000000000000000000000'
+export const isDeployed = (k) => CONTRACTS[k] !== ZERO
 
-export const isDeployed = (key = 'land') =>
-  CONTRACTS[key] !== '0x0000000000000000000000000000000000000000'
+export const RESOURCE_NAMES  = ['Gold', 'Wood', 'Water', 'Fire', 'Soil']
+export const RESOURCE_ICONS  = ['◈', '✦', '◉', '⬡', '◆']
+export const RESOURCE_EMOJIS = ['🪙', '🌲', '💧', '🔥', '⛰']
+export const RESOURCE_KEYS   = ['gold', 'wood', 'water', 'fire', 'soil']
+export const RESOURCE_COLORS = ['#ffd700', '#00ff88', '#00d4ff', '#ff4444', '#cc9966']
+
+export const BSC_TESTNET_EXPLORER = 'https://testnet.bscscan.com'
