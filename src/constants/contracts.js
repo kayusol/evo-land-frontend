@@ -1,0 +1,29 @@
+// ── Fill these after deploying contracts ──────────────────────
+export const CONTRACTS = {
+  ring:    '0x0000000000000000000000000000000000000000',
+  gold:    '0x0000000000000000000000000000000000000000',
+  wood:    '0x0000000000000000000000000000000000000000',
+  water:   '0x0000000000000000000000000000000000000000',
+  fire:    '0x0000000000000000000000000000000000000000',
+  soil:    '0x0000000000000000000000000000000000000000',
+  land:    '0x0000000000000000000000000000000000000000',
+  drill:   '0x0000000000000000000000000000000000000000',
+  apostle: '0x0000000000000000000000000000000000000000',
+  mining:  '0x0000000000000000000000000000000000000000',
+  auction: '0x0000000000000000000000000000000000000000',
+}
+
+export const RESOURCE_NAMES  = ['Gold', 'Wood', 'Water', 'Fire', 'Soil']
+export const RESOURCE_ICONS  = ['🪙', '🌲', '💧', '🔥', '⛰']
+export const RESOURCE_KEYS   = ['gold', 'wood', 'water', 'fire', 'soil']
+export const RESOURCE_COLORS = ['#ffd700', '#00e676', '#00e5ff', '#ff6d00', '#bcaaa4']
+export const RESOURCE_GLOWS  = [
+  'rgba(255,215,0,0.4)',
+  'rgba(0,230,118,0.4)',
+  'rgba(0,229,255,0.4)',
+  'rgba(255,109,0,0.4)',
+  'rgba(188,170,164,0.3)',
+]
+
+export const isDeployed = (key = 'land') =>
+  CONTRACTS[key] !== '0x0000000000000000000000000000000000000000'
