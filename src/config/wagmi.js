@@ -1,9 +1,9 @@
-import { createConfig, http } from 'wagmi'
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
+import { http } from 'wagmi'
 
 export const bscTestnet = {
   id: 97,
-  name: 'BSC Testnet',
+  name: 'BSC 测试网',
   nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
   rpcUrls: { default: { http: ['https://bsc-testnet-rpc.publicnode.com'] } },
   blockExplorers: { default: { name: 'BscScan', url: 'https://testnet.bscscan.com' } },
@@ -11,9 +11,9 @@ export const bscTestnet = {
 }
 
 export const wagmiConfig = getDefaultConfig({
-  appName: 'Evolution Land BSC',
-  projectId: 'evo-land-bsc-demo', // replace with real WalletConnect projectId
+  appName: '进化星球 BSC',
+  projectId: 'evo-land-bsc-demo',
   chains: [bscTestnet],
-  transports: { [bscTestnet.id]: http('https://bsc-testnet-rpc.publicnode.com') },
+  transports: { [bscTestnet.id]: http() },
   ssr: false,
 })

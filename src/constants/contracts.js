@@ -1,6 +1,4 @@
-// ================================================================
-// Fill these after running the deploy script
-// ================================================================
+// 部署合约后在此填写地址
 export const CONTRACTS = {
   ring:    '0x0000000000000000000000000000000000000000',
   gold:    '0x0000000000000000000000000000000000000000',
@@ -18,10 +16,19 @@ export const CONTRACTS = {
 export const ZERO = '0x0000000000000000000000000000000000000000'
 export const isDeployed = (k) => CONTRACTS[k] !== ZERO
 
-export const RESOURCE_NAMES  = ['Gold', 'Wood', 'Water', 'Fire', 'Soil']
-export const RESOURCE_ICONS  = ['◈', '✦', '◉', '⬡', '◆']
-export const RESOURCE_EMOJIS = ['🪙', '🌲', '💧', '🔥', '⛰']
-export const RESOURCE_KEYS   = ['gold', 'wood', 'water', 'fire', 'soil']
-export const RESOURCE_COLORS = ['#ffd700', '#00ff88', '#00d4ff', '#ff4444', '#cc9966']
+export const RES_NAMES_ZH = ['黄金', '木材', '水源', '火焰', '土地']
+export const RES_NAMES_EN = ['Gold', 'Wood', 'Water', 'Fire', 'Soil']
+export const RES_KEYS     = ['gold', 'wood', 'water', 'fire', 'soil']
+export const RES_EMOJIS   = ['🪙', '🌲', '💧', '🔥', '⛰']
+export const RES_COLORS   = ['#fbbf24', '#4ade80', '#38bdf8', '#f87171', '#a78bfa']
 
-export const BSC_TESTNET_EXPLORER = 'https://testnet.bscscan.com'
+// 地块颜色（与原版进化星球相似）
+export const LAND_COLORS = [
+  'rgba(251,191,36,0.75)',  // 0 gold  - 黄
+  'rgba(74,222,128,0.75)',  // 1 wood  - 绿（水区域用青绿）
+  'rgba(45,212,191,0.75)', // 2 water - 青绿
+  'rgba(248,113,113,0.75)',// 3 fire  - 红
+  'rgba(167,139,250,0.75)',// 4 soil  - 紫蓝
+]
+
+export const BSC_EXPLORER = 'https://testnet.bscscan.com'
