@@ -1,4 +1,3 @@
-// 部署合约后在此填写地址
 export const CONTRACTS = {
   ring:    '0x0000000000000000000000000000000000000000',
   gold:    '0x0000000000000000000000000000000000000000',
@@ -12,7 +11,6 @@ export const CONTRACTS = {
   mining:  '0x0000000000000000000000000000000000000000',
   auction: '0x0000000000000000000000000000000000000000',
 }
-
 export const ZERO = '0x0000000000000000000000000000000000000000'
 export const isDeployed = (k) => CONTRACTS[k] !== ZERO
 
@@ -22,13 +20,13 @@ export const RES_KEYS     = ['gold', 'wood', 'water', 'fire', 'soil']
 export const RES_EMOJIS   = ['🪙', '🌲', '💧', '🔥', '⛰']
 export const RES_COLORS   = ['#fbbf24', '#4ade80', '#38bdf8', '#f87171', '#a78bfa']
 
-// 地块颜色（与原版进化星球相似）
+// 地块颜色 — 高饱和度，接近原版进化星球
 export const LAND_COLORS = [
-  'rgba(251,191,36,0.75)',  // 0 gold  - 黄
-  'rgba(74,222,128,0.75)',  // 1 wood  - 绿（水区域用青绿）
-  'rgba(45,212,191,0.75)', // 2 water - 青绿
-  'rgba(248,113,113,0.75)',// 3 fire  - 红
-  'rgba(167,139,250,0.75)',// 4 soil  - 紫蓝
+  '#d4a017',   // gold  - 深黄
+  '#2dd4bf',   // wood  - 青绿（截图里水/木区域是青色）
+  '#2563eb',   // water - 蓝
+  '#dc2626',   // fire  - 红
+  '#7c3aed',   // soil  - 紫蓝（截图里大块是蓝紫色）
 ]
 
 export const BSC_EXPLORER = 'https://testnet.bscscan.com'

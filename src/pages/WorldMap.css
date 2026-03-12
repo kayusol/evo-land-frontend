@@ -3,26 +3,35 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  position: relative;
+  background: #060d1a;
 }
 
 .map-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 14px;
-  background: rgba(17,24,39,0.95);
+  padding: 7px 14px;
+  background: rgba(15,20,35,0.97);
   border-bottom: 1px solid rgba(255,255,255,0.07);
   flex-shrink: 0;
   flex-wrap: wrap;
   gap: 8px;
+  z-index: 10;
 }
-.map-toolbar-left { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.map-toolbar-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .map-toolbar-right { display: flex; align-items: center; gap: 10px; }
-.map-title { font-size: 14px; font-weight: 600; color: #f1f5f9; }
-.map-legend { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.map-section-label { font-size: 14px; font-weight: 600; color: #e2e8f0; white-space: nowrap; }
+.map-zoom-label { font-size: 11px; color: #4a5568; font-family: monospace; }
+.map-tool-btn {
+  padding: 4px 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px; color: #94a3b8; font-size: 12px; cursor: pointer; transition: all 0.15s;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+.map-tool-btn:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+
+.map-legend { display: flex; gap: 10px; flex-wrap: wrap; }
 .legend-item {
-  display: flex; align-items: center; gap: 5px;
+  display: flex; align-items: center; gap: 4px;
   font-size: 11px; color: #94a3b8;
 }
 .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
@@ -31,7 +40,6 @@
   flex: 1;
   display: flex;
   overflow: hidden;
-  position: relative;
 }
 
 .map-canvas-wrap {
@@ -55,15 +63,23 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(17,24,39,0.85);
+  background: rgba(10,15,30,0.88);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 20px;
-  padding: 4px 12px;
+  padding: 4px 14px;
   font-size: 11px;
   color: #64748b;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
   white-space: nowrap;
+  pointer-events: none;
 }
+.badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #f59e0b;
+  animation: badge-pulse 2s infinite;
+  flex-shrink: 0;
+}
+@keyframes badge-pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
 
 .map-zoom-ctrl {
   position: absolute;
@@ -72,41 +88,48 @@
   transform: translateY(50%);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  background: rgba(17,24,39,0.9);
+  background: rgba(15,20,35,0.92);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .zoom-btn {
-  width: 32px; height: 32px;
+  width: 34px; height: 34px;
   background: none; border: none;
-  color: #94a3b8; font-size: 18px;
+  color: #94a3b8; font-size: 20px;
   cursor: pointer; transition: all 0.15s;
   display: flex; align-items: center; justify-content: center;
+  font-family: monospace;
 }
 .zoom-btn:hover { background: rgba(255,255,255,0.08); color: #f1f5f9; }
-.zoom-val {
-  font-family: monospace; font-size: 9px; color: #475569;
-  padding: 2px 0; text-align: center; width: 100%;
+.zoom-sep { height: 1px; background: rgba(255,255,255,0.08); margin: 0; }
+
+.map-coord-tip {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(10,15,30,0.88);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: monospace;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
 }
 
-.map-connect-hint {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
+.map-bottom-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(17,24,39,0.92);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
+  justify-content: center;
+  gap: 16px;
   padding: 8px 16px;
+  background: rgba(10,15,25,0.95);
+  border-top: 1px solid rgba(255,255,255,0.07);
   font-size: 12px;
-  color: #64748b;
-  backdrop-filter: blur(8px);
-  white-space: nowrap;
-  z-index: 10;
+  color: #4a5568;
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
