@@ -3,15 +3,35 @@ import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
 import { parseEther, getContract, formatEther } from 'viem'
 import {
   CONTRACTS, RES_NAMES_ZH, RES_NAMES_EN,
-  RES_EMOJIS, RES_COLORS, LAND_COLORS, isDeployed,
+  RES_EMOJIS, RES_COLORS, isDeployed,
 } from '../constants/contracts.js'
 import { LAND_ABI, AUCTION_ABI, MINING_ABI } from '../constants/abi.js'
 import { useToast } from '../contexts/ToastContext.jsx'
 import './LandPanel.css'
 
-const TYPE_ZH   = ['黄金大陆', '木材森林', '水源绿洲', '火焰熔岩', '土地荒原']
-const TYPE_EN   = ['Gold', 'Wood', 'Water', 'Fire', 'Soil']
+const TYPE_ZH = ['黄金大陆', '木材森林', '水源绿洲', '火焰熔岩', '土地荒原']
 const CONTINENT = 'BSC 测试网 (Testnet)'
+
+function ResCircle({ i, val, isTop }) {
+  const COLORS = ['#f59e0b','#22c55e','#06b6d4','#ef4444','#a78bfa']
+  const ICONS  = ['🪙','🌲','💧','🔥','⛰']
+  return (
+    <div className={`lp-res-item${isTop?' lp-res-top':''}`}>
+      <div className="lp-res-circle"
+        style={{
+          background: `${COLORS[i]}18`,
+          border: `2.5px solid ${isTop ? COLORS[i] : COLORS[i]+'44'}`,
+          boxShadow: isTop ? `0 0 12px ${COLORS[i]}44` : 'none',
+        }}
+      >
+        <span style={{fontSize:18}}>{ICONS[i]}</span>
+      </div>
+      <div className="lp-res-label" style={{color: COLORS[i]}}>{RES_NAMES_EN[i].toUpperCase()}</div>
+      <div className="lp-res-val">{val}</div>
+      <div className="lp-res-zh">{RES_NAMES_ZH[i]}</div>
+    </div>
+  )
+}
 
 export default function LandPanel({ land, onClose }) {
   const { address } = useAccount()
@@ -20,338 +40,233 @@ export default function LandPanel({ land, onClose }) {
   const { toast } = useToast()
   const { x, y, tokenId, attr } = land
 
-  const [chainData, setChainData] = useState(null)  // { owner, rates, slots, pending }
-  const [loading, setLoading]     = useState(false)
-  const [section, setSection]     = useState('info') // 'info' | 'auction'
-  const [aForm, setAForm]         = useState({ start: '10', end: '1', days: '7' })
-  const [tx, setTx]               = useState('')
+  const [chain, setChain]   = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [showAuction, setShowAuction] = useState(false)
+  const [aForm, setAForm]   = useState({ start: '10', end: '1', days: '7' })
+  const [tx, setTx]         = useState('')
 
-  const mainColor = LAND_COLORS[attr.mainType]
-  const isDepl    = isDeployed('land')
+  const isDepl = isDeployed('land')
 
-  // 拉取链上数据
   const fetchChain = useCallback(async () => {
     if (!pub || !isDepl) return
     setLoading(true)
     try {
       const lc = getContract({ address: CONTRACTS.land, abi: LAND_ABI, client: pub })
       const owner = await lc.read.ownerOf([BigInt(tokenId)])
-      const raw80 = await lc.read.resourceAttr([BigInt(tokenId)])
-      const n     = BigInt(raw80)
-      const rates = Array.from({ length: 5 }, (_, i) => Number((n >> BigInt(i * 16)) & 0xFFFFn))
-
-      let slots = [], pending = []
+      const raw   = await lc.read.resourceAttr([BigInt(tokenId)])
+      const n     = BigInt(raw)
+      const rates = Array.from({length:5}, (_,i) => Number((n >> BigInt(i*16)) & 0xFFFFn))
+      let slots=[], pending=[]
       if (isDeployed('mining')) {
         const mc  = getContract({ address: CONTRACTS.mining, abi: MINING_ABI, client: pub })
         const cnt = Number(await mc.read.slotCount([BigInt(tokenId)]))
-        const sd  = await Promise.all(
-          Array.from({ length: cnt }, (_, i) => mc.read.slots([BigInt(tokenId), BigInt(i)]))
-        )
-        slots   = sd.map(s => ({ apo: Number(s.apostleId), drill: Number(s.drillId), t: Number(s.startTime) }))
-        const rw = await mc.read.pendingRewards([BigInt(tokenId)])
-        pending  = Array.from(rw).map(r => parseFloat(formatEther(r)))
+        const sd  = await Promise.all(Array.from({length:cnt},(_,i) => mc.read.slots([BigInt(tokenId),BigInt(i)])))
+        slots     = sd.map(s=>({apo:Number(s.apostleId),drill:Number(s.drillId),t:Number(s.startTime)}))
+        const rw  = await mc.read.pendingRewards([BigInt(tokenId)])
+        pending   = Array.from(rw).map(r=>parseFloat(formatEther(r)))
       }
-      setChainData({ owner, rates, slots, pending })
+      setChain({ owner, rates, slots, pending })
     } catch {}
     finally { setLoading(false) }
   }, [tokenId, pub, isDepl])
 
-  useEffect(() => { fetchChain() }, [fetchChain])
+  useEffect(()=>{ fetchChain() },[fetchChain])
 
-  const isMine = !!(address && chainData?.owner?.toLowerCase() === address?.toLowerCase())
-  const rates  = chainData?.rates ?? attr.rates
+  const isMine = !!(address && chain?.owner?.toLowerCase() === address?.toLowerCase())
+  const rates  = chain?.rates ?? attr.rates
   const maxVal = Math.max(...rates, 1)
 
-  // ── 创建荷兰拍卖 ──────────────────────────────────────
-  const doCreateAuction = async () => {
+  const doAuction = async () => {
     if (!wal) return
     setTx('auction')
     try {
-      const lc = getContract({ address: CONTRACTS.land, abi: LAND_ABI, client: wal })
-      const ac = getContract({ address: CONTRACTS.auction, abi: AUCTION_ABI, client: wal })
-      const approved = await pub.readContract({
-        address: CONTRACTS.land, abi: LAND_ABI,
-        functionName: 'getApproved', args: [BigInt(tokenId)],
-      })
-      if (approved.toLowerCase() !== CONTRACTS.auction.toLowerCase()) {
+      const lc = getContract({address:CONTRACTS.land,abi:LAND_ABI,client:wal})
+      const ac = getContract({address:CONTRACTS.auction,abi:AUCTION_ABI,client:wal})
+      const ok = await pub.readContract({address:CONTRACTS.land,abi:LAND_ABI,functionName:'getApproved',args:[BigInt(tokenId)]})
+      if (ok.toLowerCase() !== CONTRACTS.auction.toLowerCase()) {
         const h = await lc.write.approve([CONTRACTS.auction, BigInt(tokenId)])
-        await pub.waitForTransactionReceipt({ hash: h })
+        await pub.waitForTransactionReceipt({hash:h})
       }
-      const h = await ac.write.createAuction([
-        BigInt(tokenId),
-        parseEther(aForm.start),
-        parseEther(aForm.end),
-        BigInt(Number(aForm.days) * 86400),
-      ])
-      await pub.waitForTransactionReceipt({ hash: h })
+      const h = await ac.write.createAuction([BigInt(tokenId),parseEther(aForm.start),parseEther(aForm.end),BigInt(Number(aForm.days)*86400)])
+      await pub.waitForTransactionReceipt({hash:h})
       toast.ok('拍卖创建成功', `地块 #${tokenId} 已上架`)
-      setSection('info')
-    } catch (e) { toast.err('操作失败', e.message?.slice(0, 80)) }
+      setShowAuction(false)
+    } catch(e){ toast.err('操作失败', e.message?.slice(0,80)) }
     finally { setTx('') }
   }
 
-  // ── 领取资源 ──────────────────────────────────────────
   const doClaim = async () => {
     if (!wal) return
     setTx('claim')
     try {
-      const mc = getContract({ address: CONTRACTS.mining, abi: MINING_ABI, client: wal })
+      const mc = getContract({address:CONTRACTS.mining,abi:MINING_ABI,client:wal})
       const h  = await mc.write.claim([BigInt(tokenId)])
-      await pub.waitForTransactionReceipt({ hash: h })
-      toast.ok('领取成功', '资源已发送到您的钱包')
+      await pub.waitForTransactionReceipt({hash:h})
+      toast.ok('领取成功', '资源已到账')
       fetchChain()
-    } catch (e) { toast.err('操作失败', e.message?.slice(0, 80)) }
+    } catch(e){ toast.err('操作失败', e.message?.slice(0,80)) }
     finally { setTx('') }
   }
 
-  const hasPending = chainData?.pending?.some(v => v > 0.0001)
-
   return (
     <div className="lp">
-      {/* ── 返回栏 ── */}
+      {/* 返回栏 */}
       <div className="lp-topbar">
-        <button className="lp-back" onClick={onClose}>← 后退 Back</button>
-        <span className="tag tag-gray" style={{ fontFamily: 'monospace', fontSize: 10 }}>
-          #{String(tokenId).padStart(5, '0')}
-        </span>
+        <button className="lp-back" onClick={onClose}>← 后退</button>
       </div>
 
-      {/* ══ 属性区 ══ */}
-      <section className="lp-sec">
-        <div className="lp-sec-hd">
-          <span className="lp-sec-zh">属性</span>
-          <span className="lp-sec-en">Attributes</span>
-          <span className="lp-help">ⓘ</span>
-        </div>
-
-        <div className="lp-attr-grid">
+      {/* ═══ 属性区 ═══ */}
+      <div className="lp-sec">
+        <div className="lp-sec-hd">属性 <span className="lp-help">ⓘ</span></div>
+        <div className="lp-attr-row">
           <div className="lp-attr">
-            <div className="lp-attr-lbl">类型 Type</div>
-            <div className="lp-attr-val" style={{ color: mainColor }}>
-              {TYPE_ZH[attr.mainType]}
-            </div>
+            <div className="lp-attr-lbl">类型</div>
+            <div className="lp-attr-val">{TYPE_ZH[attr.mainType]}</div>
           </div>
           <div className="lp-attr">
-            <div className="lp-attr-lbl">坐标 Coord</div>
-            <div className="lp-attr-val" style={{ fontFamily: 'monospace' }}>{x}, {y}</div>
+            <div className="lp-attr-lbl">坐标</div>
+            <div className="lp-attr-val" style={{fontFamily:'monospace'}}>{x}, {y}</div>
           </div>
           <div className="lp-attr">
-            <div className="lp-attr-lbl">大陆 Continent</div>
-            <div className="lp-attr-val" style={{ fontSize: 11 }}>{CONTINENT}</div>
+            <div className="lp-attr-lbl">大陆</div>
+            <div className="lp-attr-val">{CONTINENT}</div>
           </div>
         </div>
-
-        {/* 所有者 */}
-        <div className="lp-owner">
-          <span className="lp-owner-lbl">所有者 Owner</span>
-          {loading ? (
-            <span style={{ color: '#2d3748', fontSize: 11 }}>加载中...</span>
-          ) : chainData?.owner ? (
-            isMine
-              ? <span className="lp-mine">🙋 我的地块 My Land</span>
-              : <span className="lp-addr">{chainData.owner}</span>
-          ) : (
-            <span className="lp-unminted">⬡ 尚未铸造（预览）Unminted</span>
-          )}
+        <div className="lp-owner-row">
+          <span className="lp-owner-lbl">所有者</span>
+          {loading ? <span style={{color:'#334155',fontSize:11}}>加载中...</span>
+          : chain?.owner
+            ? isMine
+              ? <span className="lp-mine">🙋 我的地块</span>
+              : <span className="lp-addr">{chain.owner.slice(0,12)}...{chain.owner.slice(-6)}</span>
+            : <span style={{color:'#22c55e',fontSize:11}}>⬡ 尚未铸造（预览）</span>}
         </div>
-      </section>
+      </div>
 
-      {/* ══ 信息区 ══ */}
-      <section className="lp-sec">
-        <div className="lp-sec-hd">
-          <span className="lp-sec-zh">信息</span>
-          <span className="lp-sec-en">Info</span>
-        </div>
-        <div className="lp-info-row">
-          <div>
-            <div className="lp-info-lbl">介绍 Description</div>
-            <div className="lp-info-empty">空空如也 Empty</div>
+      {/* ═══ 信息区 ═══ */}
+      <div className="lp-sec">
+        <div className="lp-sec-hd">信息</div>
+        <div className="lp-info-grid">
+          {/* 左: 头像/图片占位 */}
+          <div className="lp-info-avatar">
+            <div className="lp-avatar-box">🗺</div>
           </div>
-          <div>
-            <div className="lp-info-lbl">链接 Link</div>
-            <div className="lp-info-empty">空空如也 Empty</div>
+          {/* 右: 介绍+链接 */}
+          <div className="lp-info-right">
+            <div className="lp-info-lbl">介绍</div>
+            <div className="lp-info-empty">空空如也</div>
+            <div className="lp-info-lbl" style={{marginTop:8}}>链接</div>
+            <div className="lp-info-empty">空空如也</div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ══ 元素区 ══ */}
-      <section className="lp-sec lp-sec-res">
-        <div className="lp-sec-hd">
-          <span className="lp-sec-zh">元素</span>
-          <span className="lp-sec-en">Resources</span>
-          <span className="lp-help">ⓘ</span>
-        </div>
-
-        {/* 5个圆形图标 + 数值（精确还原原版布局） */}
+      {/* ═══ 元素区 ═══ */}
+      <div className="lp-sec">
+        <div className="lp-sec-hd">元素 <span className="lp-help">ⓘ</span></div>
+        {/* 5个圆形图标排成一行 */}
         <div className="lp-res-row">
-          {RES_NAMES_EN.map((name, i) => {
-            const val = rates[i] || 0
-            const isTop = val === maxVal && val > 0
-            return (
-              <div key={i} className={`lp-res-item ${isTop ? 'top' : ''}`}>
-                <div
-                  className="lp-res-circle"
-                  style={{
-                    background: `${RES_COLORS[i]}1a`,
-                    border: `2px solid ${isTop ? RES_COLORS[i] : RES_COLORS[i] + '55'}`,
-                    boxShadow: isTop ? `0 0 10px ${RES_COLORS[i]}33` : 'none',
-                  }}
-                >
-                  <span style={{ fontSize: 17 }}>{RES_EMOJIS[i]}</span>
-                </div>
-                <div className="lp-res-name" style={{ color: RES_COLORS[i] }}>
-                  {name.toUpperCase()}
-                </div>
-                <div className="lp-res-val">{val}</div>
-                <div className="lp-res-zh">{RES_NAMES_ZH[i]}</div>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* 进度条 */}
-        <div className="lp-bars">
           {rates.map((val, i) => (
-            <div key={i} className="lp-bar-row">
-              <div className="lp-bar-label">
-                <span>{RES_NAMES_ZH[i]}</span>
-                <span style={{ color: RES_COLORS[i], fontWeight: 700, fontFamily: 'Rajdhani, monospace' }}>{val}</span>
-              </div>
-              <div className="lp-bar-bg">
-                <div
-                  className="lp-bar-fill"
-                  style={{
-                    width:      `${Math.min(100, (val / 255) * 100)}%`,
-                    background: RES_COLORS[i],
-                  }}
-                />
-              </div>
-            </div>
+            <ResCircle key={i} i={i} val={val} isTop={val===maxVal&&val>0} />
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* ══ 挖矿状态 ══ */}
-      <section className="lp-sec">
-        <div className="lp-sec-hd">
-          <span className="lp-sec-zh">挖矿状态</span>
-          <span className="lp-sec-en">Mining Status</span>
-          {chainData?.slots?.length > 0 && (
-            <span className="tag tag-green" style={{ marginLeft: 'auto', fontSize: 10 }}>
-              {chainData.slots.length}/5 插槽
-            </span>
-          )}
-        </div>
-
+      {/* ═══ 使徒工牌 ═══ */}
+      <div className="lp-sec">
+        <div className="lp-sec-hd">使徒工牌</div>
         {!isDeployed('mining') ? (
-          <div className="lp-tip">⚠ 合约未部署 Contract not deployed</div>
+          <div className="lp-empty-state">⚠ 合约未部署</div>
         ) : loading ? (
-          <div className="lp-tip">加载中... Loading</div>
-        ) : !chainData ? (
-          <div className="lp-tip">连接钱包后可查看挖矿信息</div>
-        ) : chainData.slots.length === 0 ? (
-          <div className="lp-mining-empty">
-            <span style={{ fontSize: 28, opacity: 0.2 }}>⛏</span>
-            <span>暂无使徒在此挖矿</span>
-            <em>No apostles mining here</em>
-          </div>
+          <div className="lp-empty-state">加载中...</div>
+        ) : !chain || chain.slots.length === 0 ? (
+          <div className="lp-empty-state">暂无使徒在此挖矿</div>
         ) : (
           <div className="lp-slots">
-            {chainData.slots.map((s, i) => (
+            {chain.slots.map((s,i) => (
               <div key={i} className="lp-slot">
                 <div className="lp-slot-avatar">🧙</div>
                 <div className="lp-slot-info">
-                  <div className="lp-slot-title">
-                    使徒 #{s.apo}
-                    <em>Apostle</em>
-                  </div>
-                  {s.drill > 0 && (
-                    <div className="lp-slot-drill">⛏ 钻头 #{s.drill} Drill</div>
-                  )}
-                  <div className="lp-slot-time">
-                    开始 Start: {new Date(s.t * 1000).toLocaleString('zh-CN')}
-                  </div>
+                  <div>使徒 #{s.apo}</div>
+                  {s.drill>0 && <div style={{color:'#60a5fa',fontSize:11}}>⛏ 钻头 #{s.drill}</div>}
+                  <div style={{color:'#334155',fontSize:10}}>{new Date(s.t*1000).toLocaleDateString('zh-CN')}</div>
                 </div>
-                {isMine && (
-                  <button className="btn btn-danger btn-xs" disabled={!!tx}>撤回</button>
-                )}
+                {isMine && <button className="btn btn-danger btn-xs" disabled={!!tx} onClick={()=>{}}>撤回</button>}
               </div>
             ))}
           </div>
         )}
 
-        {/* 待领取奖励 */}
-        {hasPending && (
+        {/* 待领取 */}
+        {chain?.pending?.some(v=>v>0.0001) && (
           <div className="lp-pending">
-            <div className="lp-pending-hd">待领取 Pending Rewards</div>
-            <div className="lp-pending-grid">
-              {chainData.pending.map((v, i) => v > 0.0001 && (
-                <div key={i} className="lp-pending-item">
-                  <span style={{ fontSize: 18 }}>{RES_EMOJIS[i]}</span>
-                  <span style={{ color: RES_COLORS[i], fontWeight: 700, fontSize: 13 }}>{v.toFixed(4)}</span>
-                  <span style={{ color: '#334155', fontSize: 10 }}>{RES_NAMES_ZH[i]}</span>
+            <div style={{fontSize:11,color:'#4ade80',marginBottom:6}}>待领取 Pending</div>
+            <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+              {chain.pending.map((v,i) => v>0.0001 && (
+                <div key={i} style={{display:'flex',alignItems:'center',gap:4}}>
+                  <span style={{fontSize:16}}>{RES_EMOJIS[i]}</span>
+                  <span style={{color:RES_COLORS[i],fontWeight:700,fontSize:13}}>{v.toFixed(4)}</span>
                 </div>
               ))}
             </div>
             {isMine && (
-              <button className="btn btn-primary btn-sm" onClick={doClaim} disabled={!!tx}>
-                {tx === 'claim' ? <span className="spin-anim">◌</span> : null}
-                一键领取 Claim All
+              <button className="btn btn-primary btn-sm" style={{marginTop:8}} onClick={doClaim} disabled={!!tx}>
+                {tx==='claim'&&<span className="spin-anim">◌</span>} 领取
               </button>
             )}
           </div>
         )}
-      </section>
+      </div>
 
-      {/* ══ 操作区 ══ */}
-      {address && (
-        <section className="lp-sec lp-sec-action">
-          <div className="lp-sec-hd">
-            <span className="lp-sec-zh">操作</span>
-            <span className="lp-sec-en">Actions</span>
-          </div>
+      {/* ═══ 钻头工牌 ═══ */}
+      <div className="lp-sec">
+        <div className="lp-sec-hd">钻头工牌</div>
+        <div className="lp-empty-state">暂无钻头</div>
+      </div>
 
-          {!isDepl ? (
-            <div className="lp-tip">合约未部署，功能暂不可用</div>
-          ) : isMine ? (
+      {/* ═══ 交易历史 ═══ */}
+      <div className="lp-sec">
+        <div className="lp-sec-hd">交易历史</div>
+        <div className="lp-trade-hd">
+          <span>BIDER</span><span>CLAIM TIME</span><span>PRICE</span>
+        </div>
+        <div className="lp-empty-state">暂无交易记录</div>
+      </div>
+
+      {/* ═══ 操作区 ═══ */}
+      {address && isDepl && (
+        <div className="lp-sec">
+          {isMine ? (
             <>
-              <div className="lp-action-row">
-                <button className="btn btn-sm"
-                  onClick={() => setSection(s => s === 'auction' ? 'info' : 'auction')}
-                >
-                  🏛 {section === 'auction' ? '收起' : '上架拍卖 List Auction'}
+              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                <button className="btn btn-sm" onClick={()=>setShowAuction(a=>!a)}>
+                  🏛 {showAuction?'收起':'上架拍卖'}
                 </button>
-                <button className="btn btn-sm">⛏ 派遣使徒 Send Apostle</button>
+                <button className="btn btn-sm">⛏ 派遣使徒</button>
               </div>
-
-              {section === 'auction' && (
+              {showAuction && (
                 <div className="lp-form-box">
                   <div className="lp-form-title">荷兰拍卖 Dutch Auction</div>
-                  <p className="lp-form-desc">价格随时间线性下降，买家随时可以按当前价格购买。</p>
-                  {[['起拍价 Start (RING)', 'start'], ['底价 End (RING)', 'end'], ['持续天数 Days', 'days']].map(([l, k]) => (
-                    <div key={k} className="form-group" style={{ marginBottom: 8 }}>
-                      <label style={{ fontSize: 11, color: '#475569', marginBottom: 4, display: 'block' }}>{l}</label>
-                      <input
-                        type="number" value={aForm[k]}
-                        onChange={e => setAForm(f => ({ ...f, [k]: e.target.value }))}
-                      />
+                  {[['起拍价 (RING)','start'],['底价 (RING)','end'],['持续天数','days']].map(([l,k])=>(
+                    <div key={k} className="form-group" style={{marginBottom:8}}>
+                      <label style={{fontSize:11,color:'#475569',marginBottom:3,display:'block'}}>{l}</label>
+                      <input type="number" value={aForm[k]} onChange={e=>setAForm(f=>({...f,[k]:e.target.value}))} />
                     </div>
                   ))}
-                  <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-                    <button className="btn btn-sm" onClick={() => setSection('info')}>取消</button>
-                    <button className="btn btn-primary btn-sm" onClick={doCreateAuction} disabled={!!tx}>
-                      {tx === 'auction' ? <span className="spin-anim">◌</span> : null} 创建拍卖
+                  <div style={{display:'flex',gap:8,marginTop:6}}>
+                    <button className="btn btn-sm" onClick={()=>setShowAuction(false)}>取消</button>
+                    <button className="btn btn-primary btn-sm" onClick={doAuction} disabled={!!tx}>
+                      {tx==='auction'&&<span className="spin-anim">◌</span>} 创建拍卖
                     </button>
                   </div>
                 </div>
               )}
             </>
-          ) : chainData?.owner ? (
-            <button className="btn btn-gold btn-sm">💰 竞拍此地 Bid Now</button>
-          ) : (
-            <div className="lp-tip" style={{ color: '#4ade80' }}>⬡ 此地块尚未铸造，可在上线后购买</div>
-          )}
-        </section>
+          ) : chain?.owner ? (
+            <button className="btn btn-gold btn-sm">💰 竞拍此地 Bid</button>
+          ) : null}
+        </div>
       )}
     </div>
   )

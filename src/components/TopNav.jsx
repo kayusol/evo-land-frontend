@@ -5,38 +5,31 @@ import './TopNav.css'
 export default function TopNav({ pages, current, onChange }) {
   return (
     <nav className="top-nav">
-      {/* Logo */}
+      {/* Logo - 原版风格 */}
       <div className="nav-logo">
-        <img src="/favicon.svg" width="26" height="26" alt="logo"
-          style={{ filter: 'drop-shadow(0 0 5px rgba(74,222,128,0.45))' }} />
+        <div className="nav-logo-icon">⬡</div>
         <div className="nav-logo-text">
-          <span className="nav-logo-zh">进化星球</span>
-          <span className="nav-logo-en">BSC · 单链版</span>
+          <span className="nav-logo-main">EVOLUTION LAND</span>
+          <span className="nav-logo-sub">BSC Edition</span>
         </div>
       </div>
 
-      {/* 页面导航 */}
+      {/* 主导航 - 仿原版图标+文字 */}
       <div className="nav-links">
         {pages.map(p => (
           <button
             key={p.id}
-            className={`nav-link ${current === p.id ? 'active' : ''}`}
+            className={`nav-link${current === p.id ? ' active' : ''}`}
             onClick={() => onChange(p.id)}
           >
             <span className="nl-icon">{p.icon}</span>
-            <span className="nl-zh">{p.zh}</span>
-            <span className="nl-en">{p.en}</span>
+            <span className="nl-label">{p.zh}</span>
           </button>
         ))}
       </div>
 
-      {/* 右侧连接按钮 */}
       <div className="nav-right">
-        <ConnectButton
-          chainStatus="icon"
-          showBalance={false}
-          accountStatus="address"
-        />
+        <ConnectButton chainStatus="icon" showBalance={false} accountStatus="short" />
       </div>
     </nav>
   )

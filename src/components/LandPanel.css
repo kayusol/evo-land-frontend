@@ -1,202 +1,127 @@
-/* 面板根 */
 .lp {
-  width: 295px;
+  width: 280px;
   min-width: 260px;
   flex-shrink: 0;
-  background: #121c30;
-  border-left: 1px solid rgba(255,255,255,0.07);
+  background: #0f1929;
+  border-left: 1px solid rgba(255,255,255,0.08);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  animation: slideIn 0.22s ease;
+  animation: slideIn 0.2s ease;
 }
-
-/* 顶部返回栏 */
 .lp-topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 9px 13px;
+  padding: 10px 14px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  background: rgba(8,12,24,0.55);
+  background: rgba(5,10,20,0.5);
   flex-shrink: 0;
 }
 .lp-back {
   background: none; border: none;
-  color: #4a5568; font-size: 12px;
-  cursor: pointer; padding: 3px 6px;
-  border-radius: 4px; transition: all 0.15s;
+  color: #64748b; font-size: 13px;
+  cursor: pointer; padding: 4px 8px;
+  border-radius: 5px; transition: all 0.15s;
   font-family: 'Noto Sans SC', sans-serif;
 }
-.lp-back:hover { color: #94a3b8; background: rgba(255,255,255,0.05); }
+.lp-back:hover { color: #94a3b8; background: rgba(255,255,255,0.06); }
 
-/* 通用 Section */
 .lp-sec {
-  padding: 11px 13px;
+  padding: 12px 14px;
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .lp-sec-hd {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 9px;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 10px;
 }
-.lp-sec-zh { font-size: 13px; font-weight: 600; color: #cbd5e1; }
-.lp-sec-en {
-  font-size: 10px; color: #2d3748;
-  font-family: 'Rajdhani', sans-serif; letter-spacing: 0.04em;
-}
-.lp-help { font-size: 11px; color: #1e2d40; cursor: help; margin-left: auto; }
+.lp-help { font-size: 11px; color: #1e2d40; cursor: help; }
 
-/* 属性网格 */
-.lp-attr-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 9px;
-}
-.lp-attr-lbl { font-size: 9px; color: #334155; margin-bottom: 3px; }
-.lp-attr-val {
-  font-size: 12px; color: #e2e8f0;
-  font-weight: 500; line-height: 1.3;
-  word-break: break-all;
-}
+/* 属性 */
+.lp-attr-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.lp-attr-lbl { font-size: 9px; color: #334155; margin-bottom: 2px; }
+.lp-attr-val { font-size: 11px; color: #e2e8f0; font-weight: 500; word-break: break-all; line-height: 1.3; }
+.lp-owner-row { display: flex; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.04); }
+.lp-owner-lbl { font-size: 9px; color: #334155; flex-shrink: 0; }
+.lp-addr { font-size: 10px; color: #475569; font-family: monospace; }
+.lp-mine { font-size: 12px; color: #4ade80; font-weight: 600; }
 
-/* 所有者 */
-.lp-owner {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.04);
+/* 信息 */
+.lp-info-grid { display: grid; grid-template-columns: 76px 1fr; gap: 10px; align-items: flex-start; }
+.lp-avatar-box {
+  width: 76px; height: 76px;
+  background: #1a2540;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
 }
-.lp-owner-lbl { font-size: 9px; color: #334155; }
-.lp-addr      { font-size: 10px; color: #64748b; font-family: monospace; word-break: break-all; }
-.lp-mine      { font-size: 12px; color: #4ade80; font-weight: 600; }
-.lp-unminted  { font-size: 11px; color: #22c55e; }
-
-/* 信息行 */
-.lp-info-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.lp-info-lbl  { font-size: 9px; color: #2d3748; margin-bottom: 3px; }
+.lp-info-lbl  { font-size: 10px; color: #334155; margin-bottom: 3px; }
 .lp-info-empty { font-size: 11px; color: #1e2a3a; font-style: italic; }
 
-/* 元素区 */
-.lp-sec-res { background: rgba(4,8,18,0.4); }
-
-/* 5个圆形图标行 */
+/* 元素圆形 */
 .lp-res-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 4px;
-  margin-bottom: 12px;
 }
 .lp-res-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
   padding: 5px 2px;
   border-radius: 7px;
-  transition: background 0.15s;
 }
-.lp-res-item.top { background: rgba(255,255,255,0.04); }
+.lp-res-item.lp-res-top { background: rgba(255,255,255,0.04); }
 .lp-res-circle {
-  width: 38px; height: 38px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
 }
-.lp-res-name {
-  font-size: 8px; font-weight: 700;
-  letter-spacing: 0.03em;
-  font-family: 'Rajdhani', monospace;
-  text-align: center;
-}
-.lp-res-val {
-  font-size: 15px; font-weight: 800;
-  color: #e2e8f0; line-height: 1;
-  font-family: 'Rajdhani', monospace;
-}
-.lp-res-zh { font-size: 9px; color: #2d3748; }
+.lp-res-label { font-size: 8px; font-weight: 700; letter-spacing: 0.03em; font-family: 'Rajdhani', monospace; text-align: center; }
+.lp-res-val   { font-size: 16px; font-weight: 800; color: #e2e8f0; line-height: 1; font-family: 'Rajdhani', monospace; }
+.lp-res-zh    { font-size: 9px; color: #2d3748; }
 
-/* 进度条 */
-.lp-bars { display: flex; flex-direction: column; gap: 5px; }
-.lp-bar-row {}
-.lp-bar-label {
-  display: flex; justify-content: space-between;
-  font-size: 11px; color: #334155; margin-bottom: 2px;
-}
-.lp-bar-bg {
-  height: 5px; background: rgba(255,255,255,0.04);
-  border-radius: 3px; overflow: hidden;
-}
-.lp-bar-fill {
-  height: 100%; border-radius: 3px;
-  transition: width 0.55s ease;
-}
-
-/* 提示文字 */
-.lp-tip {
-  font-size: 12px; color: #334155; line-height: 1.5;
-  padding: 6px 0;
-}
-
-/* 挖矿空状态 */
-.lp-mining-empty {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 4px;
-  padding: 16px 0;
-  font-size: 12px; color: #1e2d40;
-}
-.lp-mining-empty em { font-style: normal; font-size: 10px; color: #1a2638; }
-
-/* 插槽列表 */
-.lp-slots { display: flex; flex-direction: column; gap: 7px; }
+/* 使徒 */
+.lp-empty-state { font-size: 11px; color: #1e2a3a; padding: 6px 0; text-align: center; }
+.lp-slots { display: flex; flex-direction: column; gap: 6px; }
 .lp-slot {
-  display: flex; align-items: flex-start; gap: 9px;
-  padding: 9px 10px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
   background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.05);
   border-radius: 7px;
 }
 .lp-slot-avatar {
-  font-size: 22px; flex-shrink: 0;
-  width: 36px; height: 36px;
-  background: rgba(255,255,255,0.04);
-  border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; width: 34px; height: 34px;
+  background: rgba(255,255,255,0.04); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.lp-slot-info { flex: 1; min-width: 0; }
-.lp-slot-title {
-  font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 2px;
-  display: flex; align-items: center; gap: 5px;
-}
-.lp-slot-title em { font-style: normal; font-size: 10px; color: #334155; }
-.lp-slot-drill { font-size: 11px; color: #60a5fa; margin-bottom: 2px; }
-.lp-slot-time  { font-size: 10px; color: #1e2d40; }
-
-/* 待领取 */
+.lp-slot-info { flex: 1; font-size: 12px; color: #e2e8f0; }
 .lp-pending {
-  margin-top: 9px; padding: 10px;
+  margin-top: 8px; padding: 10px;
   background: rgba(74,222,128,0.04);
   border: 1px solid rgba(74,222,128,0.1);
   border-radius: 7px;
-  display: flex; flex-direction: column; gap: 8px;
-}
-.lp-pending-hd  { font-size: 11px; color: #4ade80; font-weight: 600; }
-.lp-pending-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
-.lp-pending-item {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
 
-/* 操作区 */
-.lp-sec-action {}
-.lp-action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 9px; }
+/* 交易历史 */
+.lp-trade-hd {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  font-size: 10px; color: #2d3748;
+  margin-bottom: 6px;
+}
+
+/* 操作 */
 .lp-form-box {
   background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 7px; padding: 12px;
+  margin-top: 10px;
 }
-.lp-form-title { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 5px; }
-.lp-form-desc  { font-size: 11px; color: #2d3748; line-height: 1.5; margin-bottom: 10px; }
+.lp-form-title { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 8px; }

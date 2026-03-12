@@ -1,69 +1,67 @@
 .top-nav {
-  height: 52px;
+  height: 54px;
   display: flex;
   align-items: center;
-  padding: 0 14px;
-  background: rgba(10,16,32,0.98);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  backdrop-filter: blur(12px);
+  padding: 0 16px;
+  background: #0d1117;
+  border-bottom: 2px solid rgba(74,222,128,0.18);
   position: relative;
   z-index: 200;
   flex-shrink: 0;
-  gap: 12px;
+  gap: 0;
 }
 
-/* Logo */
 .nav-logo {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   flex-shrink: 0;
-  margin-right: 4px;
-  text-decoration: none;
+  padding-right: 24px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  margin-right: 8px;
 }
-.nav-logo-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-.nav-logo-zh {
-  font-size: 14px;
-  font-weight: 700;
+.nav-logo-icon {
+  font-size: 24px;
   color: #4ade80;
-  line-height: 1.1;
-  letter-spacing: 0.02em;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(74,222,128,0.5));
 }
-.nav-logo-en {
-  font-size: 9px;
-  color: #334155;
+.nav-logo-text { display: flex; flex-direction: column; }
+.nav-logo-main {
+  font-size: 13px; font-weight: 800;
+  color: #f1f5f9;
   letter-spacing: 0.06em;
+  font-family: 'Rajdhani', sans-serif;
+  line-height: 1.1;
+}
+.nav-logo-sub {
+  font-size: 9px; color: #334155;
+  letter-spacing: 0.1em;
   font-family: 'Rajdhani', sans-serif;
 }
 
-/* Links */
 .nav-links {
   display: flex;
   align-items: stretch;
-  gap: 1px;
   flex: 1;
   height: 100%;
 }
-
 .nav-link {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 0 14px;
+  gap: 5px;
+  padding: 0 16px;
   border: none;
   background: none;
   cursor: pointer;
   transition: all 0.18s;
-  color: #475569;
+  color: #64748b;
   position: relative;
   height: 100%;
   border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  margin-bottom: -2px;
+  font-family: 'Noto Sans SC', sans-serif;
+  white-space: nowrap;
 }
 .nav-link:hover { color: #94a3b8; background: rgba(255,255,255,0.03); }
 .nav-link.active {
@@ -71,14 +69,12 @@
   border-bottom-color: #4ade80;
   background: rgba(74,222,128,0.04);
 }
+.nl-icon  { font-size: 16px; }
+.nl-label { font-size: 13px; font-weight: 500; }
 
-.nl-icon { font-size: 15px; line-height: 1; }
-.nl-zh   { font-size: 12px; font-weight: 500; line-height: 1.2; font-family: 'Noto Sans SC', sans-serif; }
-.nl-en   { font-size: 9px;  opacity: 0.45; letter-spacing: 0.04em; font-family: 'Rajdhani', sans-serif; }
-
-/* Right */
 .nav-right {
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  margin-left: auto;
 }
