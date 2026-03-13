@@ -6,6 +6,7 @@ import FarmPage from './pages/FarmPage.jsx'
 import AssetsPage from './pages/AssetsPage.jsx'
 import SwapPage from './pages/SwapPage.jsx'
 import ReferralPage from './pages/ReferralPage.jsx'
+import BlindBoxPage from './pages/BlindBoxPage.jsx'
 import Toast from './components/Toast.jsx'
 import { ToastProvider } from './contexts/ToastContext.jsx'
 import './App.css'
@@ -13,6 +14,7 @@ import './App.css'
 const PAGES = [
   { id: 'map',      zh: '地图',  en: 'Map',      icon: '🌍' },
   { id: 'market',   zh: '市场',  en: 'Market',   icon: '🏛' },
+  { id: 'blindbox', zh: '盲盒',  en: 'BlindBox', icon: '🎁' },
   { id: 'farm',     zh: '农场',  en: 'Farm',     icon: '🌾' },
   { id: 'swap',     zh: '兑换',  en: 'Swap',     icon: '🔄' },
   { id: 'referral', zh: '邀请',  en: 'Referral', icon: '🤝' },
@@ -22,7 +24,6 @@ const PAGES = [
 function AppInner() {
   const [page, setPage] = useState('map')
 
-  // 处理 ?ref=0x... 邀请参数，不需要 react-router-dom
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const ref = params.get('ref')
@@ -35,6 +36,7 @@ function AppInner() {
   const views = {
     map:      <WorldMap />,
     market:   <MarketPage />,
+    blindbox: <BlindBoxPage />,
     farm:     <FarmPage />,
     swap:     <SwapPage />,
     referral: <ReferralPage />,
