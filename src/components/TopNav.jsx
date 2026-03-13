@@ -5,16 +5,14 @@ import './TopNav.css'
 export default function TopNav({ pages, current, onChange }) {
   return (
     <nav className="top-nav">
-      {/* Logo - 原版风格 */}
       <div className="nav-logo">
-        <div className="nav-logo-icon">⬡</div>
+        <div className="nav-logo-icon">🌐</div>
         <div className="nav-logo-text">
-          <span className="nav-logo-main">EVOLUTION LAND</span>
-          <span className="nav-logo-sub">BSC Edition</span>
+          <span className="nav-logo-main">元宇宙</span>
+          <span className="nav-logo-sub">METAVERSE</span>
         </div>
       </div>
 
-      {/* 主导航 - 仿原版图标+文字 */}
       <div className="nav-links">
         {pages.map(p => (
           <button
