@@ -1,0 +1,132 @@
+.admin-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  color: var(--text, #e0e0e0);
+}
+
+.admin-header h1 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-desc {
+  color: var(--text-dim, #aaa);
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
+}
+
+.admin-warning {
+  background: rgba(255, 160, 0, 0.15);
+  border: 1px solid rgba(255, 160, 0, 0.4);
+  color: #ffa000;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.8rem;
+}
+
+.admin-step {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: var(--surface, #1a1a2e);
+  border: 1px solid var(--border, #333);
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+}
+
+.step-num {
+  background: var(--primary, #7c4dff);
+  color: #fff;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.step-desc {
+  color: var(--text-dim, #bbb);
+}
+
+.admin-run-btn {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #7c4dff, #448aff);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-bottom: 1.5rem;
+}
+
+.admin-run-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.admin-run-btn:disabled,
+.admin-run-btn.running {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-log {
+  background: #0d0d1a;
+  border: 1px solid var(--border, #333);
+  border-radius: 10px;
+  padding: 1rem;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.log-title {
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: var(--primary, #7c4dff);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.log-line {
+  display: flex;
+  gap: 0.7rem;
+  font-size: 0.85rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-family: monospace;
+}
+
+.log-time {
+  color: #555;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.log-info .log-msg  { color: #ccc; }
+.log-success .log-msg { color: #69f0ae; }
+.log-warn .log-msg  { color: #ffcc02; }
+.log-error .log-msg { color: #ff5252; }

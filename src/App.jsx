@@ -7,6 +7,7 @@ import AssetsPage from './pages/AssetsPage.jsx'
 import SwapPage from './pages/SwapPage.jsx'
 import ReferralPage from './pages/ReferralPage.jsx'
 import BlindBoxPage from './pages/BlindBoxPage.jsx'
+import AdminPage from './pages/AdminPage.jsx'
 import Toast from './components/Toast.jsx'
 import { ToastProvider } from './contexts/ToastContext.jsx'
 import './App.css'
@@ -19,6 +20,7 @@ const PAGES = [
   { id: 'swap',     zh: '兑换',  en: 'Swap',     icon: '🔄' },
   { id: 'referral', zh: '邀请',  en: 'Referral', icon: '🤝' },
   { id: 'assets',   zh: '资产',  en: 'Assets',   icon: '💎' },
+  { id: 'admin',    zh: '管理',  en: 'Admin',    icon: '🛠' },
 ]
 
 function AppInner() {
@@ -41,6 +43,7 @@ function AppInner() {
     swap:     <SwapPage />,
     referral: <ReferralPage />,
     assets:   <AssetsPage />,
+    admin:    <AdminPage />,
   }
 
   return (
